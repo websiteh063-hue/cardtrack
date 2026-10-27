@@ -1,0 +1,37 @@
+{
+  "expo": {
+    "name": "CardTrack — Credit Card & Milestone Manager",
+    "slug": "cardtrack",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "cardtrack",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "backgroundColor": "#0B0F17",
+      "resizeMode": "contain"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.cardtrack.app",
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "CardTrack requires biometric authentication to protect your financial records and card details."
+      }
+    },
+    "android": {
+      "package": "com.cardtrack.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#0B0F17",
+        "foregroundImage": "./assets/icon.png"
+      },
+      "permissions": [
+        "USE_BIOMETRIC",
+        "USE_FINGERPRINT"
+      ],
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/icon.png"
+    }
+  }
+}
