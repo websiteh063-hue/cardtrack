@@ -11,8 +11,9 @@ import {
 import { CreditCard } from '../types';
 import { useTheme } from '../context/ThemeContext';
 import { formatINR } from '../services/calculations';
-import { maskCardNumber, formatFullCardNumber } from '../services/crypto';
+import { maskCardNumber, formatFullCardNumber, decryptText } from '../services/crypto';
 import { AuthService } from '../services/auth';
+import { formatCardNumberInput } from '../constants/banks';
 
 export interface CreditCardViewProps {
   card: CreditCard;
@@ -60,8 +61,26 @@ export const CreditCardView: React.FC<CreditCardViewProps> = ({
     const authenticated = await AuthService.authenticateForCardReveal(card.card_nickname);
     if (authenticated) {
       setIsRevealed(true);
-      // In production, decrypt with secure key
-      setUnlockedFullNumber(card.encrypted_full_number ? '4111 2222 3333 ' + card.last_four_digits : null);
+      if (card.encrypted_full_number) {
+        try {
+          const payload = JSON.parse(card.encrypted_full_number);
+          if (payload.ciphertext && payload.iv && payload.salt) {
+            const decrypted = await decryptText(
+              payload.ciphertext,
+              payload.iv,
+              payload.salt,
+              'CardTrack_Local_Device_Master_Secret'
+            );
+            setUnlockedFullNumber(formatCardNumberInput(decrypted));
+          } else {
+            setUnlockedFullNumber('•••• •••• •••• ' + card.last_four_digits);
+          }
+        } catch {
+          setUnlockedFullNumber('•••• •••• •••• ' + card.last_four_digits);
+        }
+      } else {
+        setUnlockedFullNumber('•••• •••• •••• ' + card.last_four_digits);
+      }
     }
   };
 

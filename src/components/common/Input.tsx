@@ -12,7 +12,7 @@ import {
 import { useTheme } from '../../context/ThemeContext';
 
 export interface InputProps extends TextInputProps {
-  label: string;
+  label?: string;
   error?: string;
   helperText?: string;
   containerStyle?: ViewStyle;
@@ -32,12 +32,14 @@ export const Input: React.FC<InputProps> = ({
 
   return (
     <View style={[styles.container, containerStyle]}>
-      <View style={styles.labelRow}>
-        <Text style={[styles.label, { color: colors.textSecondary }]}>
-          {label}
-        </Text>
-        {required && <Text style={[styles.required, { color: colors.danger }]}> *</Text>}
-      </View>
+      {label ? (
+        <View style={styles.labelRow}>
+          <Text style={[styles.label, { color: colors.textSecondary }]}>
+            {label}
+          </Text>
+          {required && <Text style={[styles.required, { color: colors.danger }]}> *</Text>}
+        </View>
+      ) : null}
       <TextInput
         placeholderTextColor={colors.textMuted}
         style={[

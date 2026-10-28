@@ -1,6 +1,6 @@
 // src/screens/TransactionsScreen.tsx - Manual Transaction Management & Filtering
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   Modal,
   Alert,
+  BackHandler,
 } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { useApp } from '../context/AppContext';
@@ -61,6 +62,27 @@ export const TransactionsScreen: React.FC<TransactionsScreenProps> = ({
 
   const cardMap = new Map(cards.map(c => [c.id, c]));
   const personMap = new Map(people.map(p => [p.id, p.full_name]));
+
+  // Priority BackHandler for open modals in TransactionsScreen
+  useEffect(() => {
+    const isAnyModalOpen = formModalVisible || deleteModalVisible;
+    if (!isAnyModalOpen) return;
+
+    const onBackPress = () => {
+      if (deleteModalVisible) {
+        setDeleteModalVisible(false);
+        return true;
+      }
+      if (formModalVisible) {
+        setFormModalVisible(false);
+        return true;
+      }
+      return false;
+    };
+
+    const backSub = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+    return () => backSub.remove();
+  }, [formModalVisible, deleteModalVisible]);
 
   const handleOpenAdd = () => {
     if (cards.length === 0) {

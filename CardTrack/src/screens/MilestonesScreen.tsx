@@ -1,6 +1,6 @@
 // src/screens/MilestonesScreen.tsx - Milestone Tracking & Calculations
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   Modal,
   Alert,
+  BackHandler,
 } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { useApp } from '../context/AppContext';
@@ -54,6 +55,27 @@ export const MilestonesScreen: React.FC<MilestonesScreenProps> = ({
   const [milestoneToDelete, setMilestoneToDelete] = useState<Milestone | null>(null);
 
   const cardMap = new Map(cards.map(c => [c.id, c]));
+
+  // Priority BackHandler for open modals in MilestonesScreen
+  useEffect(() => {
+    const isAnyModalOpen = formModalVisible || deleteModalVisible;
+    if (!isAnyModalOpen) return;
+
+    const onBackPress = () => {
+      if (deleteModalVisible) {
+        setDeleteModalVisible(false);
+        return true;
+      }
+      if (formModalVisible) {
+        setFormModalVisible(false);
+        return true;
+      }
+      return false;
+    };
+
+    const backSub = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+    return () => backSub.remove();
+  }, [formModalVisible, deleteModalVisible]);
 
   const handleOpenAdd = () => {
     if (cards.length === 0) {

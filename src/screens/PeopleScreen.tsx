@@ -1,6 +1,6 @@
 // src/screens/PeopleScreen.tsx - Comprehensive People Profile Management
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   Modal,
   Alert,
+  BackHandler,
 } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { useApp } from '../context/AppContext';
@@ -57,6 +58,31 @@ export const PeopleScreen: React.FC<PeopleScreenProps> = ({
     transactionsCount: 0,
     milestonesCount: 0,
   });
+
+  // Priority BackHandler for open modals in PeopleScreen
+  useEffect(() => {
+    const isAnyModalOpen = formModalVisible || detailModalVisible || deleteModalVisible;
+    if (!isAnyModalOpen) return;
+
+    const onBackPress = () => {
+      if (deleteModalVisible) {
+        setDeleteModalVisible(false);
+        return true;
+      }
+      if (formModalVisible) {
+        setFormModalVisible(false);
+        return true;
+      }
+      if (detailModalVisible) {
+        setDetailModalVisible(false);
+        return true;
+      }
+      return false;
+    };
+
+    const backSub = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+    return () => backSub.remove();
+  }, [formModalVisible, detailModalVisible, deleteModalVisible]);
 
   const handleOpenAdd = () => {
     setEditingPerson(null);

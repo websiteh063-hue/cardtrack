@@ -1,6 +1,6 @@
 // src/screens/SearchScreen.tsx - Global Offline Search & Financial Dossier
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Modal,
+  BackHandler,
 } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { useApp } from '../context/AppContext';
@@ -38,6 +39,21 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
 
   // Selected Person Dossier
   const [dossier, setDossier] = useState<PersonDetailedOverview | null>(null);
+
+  // BackHandler for SearchScreen
+  useEffect(() => {
+    const onBackPress = () => {
+      if (dossier) {
+        setDossier(null);
+        return true;
+      }
+      onClose();
+      return true;
+    };
+
+    const backSub = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+    return () => backSub.remove();
+  }, [dossier, onClose]);
   const [dossierModalVisible, setDossierModalVisible] = useState(false);
 
   const handleSearch = async (text: string) => {

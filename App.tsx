@@ -1,6 +1,6 @@
 // App.tsx - CardTrack Main Application Entry & Navigation Shell
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   SafeAreaView,
   View,
@@ -10,6 +10,9 @@ import {
   StatusBar,
   Modal,
   ActivityIndicator,
+  BackHandler,
+  ToastAndroid,
+  Platform,
 } from 'react-native';
 import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 import { AppProvider, useApp } from './src/context/AppContext';
@@ -31,6 +34,40 @@ function MainAppShell() {
   const [searchModalVisible, setSearchModalVisible] = useState(false);
   const [targetCardIdForTx, setTargetCardIdForTx] = useState<string | undefined>();
   const [targetPersonIdForTx, setTargetPersonIdForTx] = useState<string | undefined>();
+  const lastBackPressRef = useRef<number>(0);
+
+  // Android Hardware Back Button Handler
+  useEffect(() => {
+    const onHardwareBackPress = () => {
+      // 1. Close global search modal if open
+      if (searchModalVisible) {
+        setSearchModalVisible(false);
+        return true;
+      }
+
+      // 2. If not on Dashboard tab, navigate to Dashboard first
+      if (activeTab !== 'dashboard') {
+        setActiveTab('dashboard');
+        return true;
+      }
+
+      // 3. If on Dashboard, double tap within 2 seconds to exit app
+      const now = Date.now();
+      if (lastBackPressRef.current && now - lastBackPressRef.current < 2000) {
+        BackHandler.exitApp();
+        return true;
+      }
+
+      lastBackPressRef.current = now;
+      if (Platform.OS === 'android') {
+        ToastAndroid.show('Press back again to exit', ToastAndroid.SHORT);
+      }
+      return true;
+    };
+
+    const backSub = BackHandler.addEventListener('hardwareBackPress', onHardwareBackPress);
+    return () => backSub.remove();
+  }, [searchModalVisible, activeTab]);
 
   // If app is loading SQLite database
   if (isLoading) {
